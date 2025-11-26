@@ -69,10 +69,6 @@ The ERD visually represents relationships:
 - Task 1 → N Comment  
 - User 1 → N Comment  
 
-(Insert `erd.png` here in repo)
 
----
 
-# ✔ This file is required for documentation, OJT, and GitHub
-Place it here:
 
