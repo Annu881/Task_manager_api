@@ -9,7 +9,9 @@ A full-stack task management application built with **FastAPI** (Backend) and **
 
 ## 🚀 Live Demo
 
-Check out the live application: **[Task Management System](https://task-manager-api-eta-sepia.vercel.app)**
+Check out the live application: **[Task Management System](https://task-manager-api-xi3b.vercel.app)**
+
+**Backend API:** [Live API Docs](https://taskmanagerapi-production-8a33.up.railway.app/docs)
 
 
 ## 🌟 Features
