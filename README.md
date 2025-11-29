@@ -7,6 +7,11 @@ A full-stack task management application built with **FastAPI** (Backend) and **
 ![Next.js](https://img.shields.io/badge/next.js-14-black.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104-green.svg)
 
+## 🚀 Live Demo
+
+Check out the live application: **[Task Management System](https://task-manager-api-eta-sepia.vercel.app)**
+
+
 ## 🌟 Features
 
 - ✅ **User Authentication** - Secure JWT-based authentication with login/signup
