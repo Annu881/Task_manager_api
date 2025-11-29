@@ -190,7 +190,7 @@ export default function TasksPage() {
                       >
                         {task.title}
                       </h3>
-                      <p className="text-gray-600 mt-2">{task.description}</p>
+                      <p className="text-gray-600 mt-2">{task.description || ''}</p>
 
                       <div className="flex items-center gap-4 mt-4">
                         <span
