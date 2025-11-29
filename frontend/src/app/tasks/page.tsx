@@ -7,18 +7,7 @@ import { Plus, CheckCircle, Circle, Trash2, Edit, Clock } from 'lucide-react'
 import { useTaskStore } from '@/lib/store/taskStore'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { taskAPI } from '@/lib/api/tasks'
-
-interface Task {
-  id: number
-  title: string
-  description?: string
-  status: 'pending' | 'in_progress' | 'completed'
-  priority: 'low' | 'medium' | 'high'
-  due_date?: string
-  created_at: string
-  updated_at: string
-  labels?: any[]
-}
+import { Task } from '@/types'
 
 export default function TasksPage() {
   const router = useRouter()
