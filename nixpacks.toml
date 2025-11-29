@@ -4,10 +4,10 @@
 [phases.setup]
 nixPkgs = ["python312", "gcc", "postgresql"]
 
-# Install dependencies
+# Install dependencies from root requirements.txt
 [phases.install]
-cmds = ["cd backend && pip install -r requirements.txt"]
+cmds = ["pip install -r requirements.txt"]
 
-# Start the application
+# Start the application (cd into backend because app code is there)
 [start]
 cmd = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
