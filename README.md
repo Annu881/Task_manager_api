@@ -61,6 +61,15 @@ graph TB
     style L fill:#ef4444
 ```
 
+## ☁️ Infrastructure
+
+The application leverages modern cloud infrastructure for optimal performance and scalability:
+
+- **Database (PostgreSQL)**: Hosted on **[Neon.tech](https://neon.tech)** - Serverless Postgres with branching.
+- **Cache (Redis)**: Hosted on **[Upstash](https://upstash.com)** - Serverless Redis for high-speed caching.
+- **Backend**: Deployed on **[Railway](https://railway.app)** - Docker-based container deployment.
+- **Frontend**: Deployed on **[Vercel](https://vercel.com)** - Global edge network for Next.js.
+
 ## 🛠️ Tech Stack
 
 ### Backend
