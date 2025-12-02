@@ -47,115 +47,79 @@ Task Management System is a production-ready application that helps teams and in
 
 ## 🏗️ Architecture
 
-### High-Level Design Diagram
+### System Architecture
 
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        A[Web Browser]
-    end
-    
-    subgraph "Frontend - Vercel"
-        B[Next.js 14 App]
-        C[React Query Cache]
-        D[Zustand State]
-    end
-    
-    subgraph "Backend - Railway"
-        E[FastAPI Server]
-        F[JWT Auth Middleware]
-        G[SQLAlchemy ORM]
-    end
-    
-    subgraph "Data Layer"
-        H[(PostgreSQL - Neon)]
-        I[(Redis Cache)]
-    end
-    
-    subgraph "External Services"
-        J[Vercel CDN]
-        K[Railway Network]
-    end
-    
-    A -->|HTTPS| B
-    B -->|API Calls| E
-    B --> C
-    B --> D
-    E --> F
-    F --> G
-    G -->|Queries| H
-    E -->|Cache| I
-    B -->|Static Assets| J
-    E -->|Deployed on| K
-    
-    style A fill:#e1f5ff
-    style B fill:#f0f0f0
-    style E fill:#fff3e0
-    style H fill:#e8f5e9
-    style I fill:#fce4ec
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLIENT LAYER                             │
+│                      (Web Browser / Mobile)                      │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ HTTPS
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    FRONTEND - Vercel                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │   Next.js    │  │ React Query  │  │   Zustand    │          │
+│  │   App Router │  │    Cache     │  │    State     │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ REST API
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    BACKEND - Railway                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │   FastAPI    │  │     JWT      │  │  SQLAlchemy  │          │
+│  │    Server    │  │     Auth     │  │     ORM      │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                ┌────────────┴────────────┐
+                ▼                         ▼
+    ┌───────────────────┐     ┌───────────────────┐
+    │   PostgreSQL      │     │      Redis        │
+    │   (Neon)          │     │    (Upstash)      │
+    │   Primary DB      │     │     Cache         │
+    └───────────────────┘     └───────────────────┘
 ```
 
-### System Flow
+### Request Flow
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant F as Frontend (Next.js)
-    participant B as Backend (FastAPI)
-    participant DB as PostgreSQL
-    participant R as Redis
-    
-    U->>F: Access Dashboard
-    F->>B: GET /api/v1/tasks/
-    B->>R: Check Cache
-    alt Cache Hit
-        R-->>B: Return Cached Data
-    else Cache Miss
-        B->>DB: Query Tasks
-        DB-->>B: Return Tasks
-        B->>R: Update Cache
-    end
-    B-->>F: Return Tasks JSON
-    F->>F: Generate Charts
-    F-->>U: Display Dashboard
+```
+1. User Action (Browser)
+   ↓
+2. Next.js Frontend (Vercel)
+   ↓
+3. API Request → FastAPI Backend (Railway)
+   ↓
+4. JWT Validation
+   ↓
+5. Check Redis Cache
+   ├─ Cache Hit → Return Data
+   └─ Cache Miss → Query PostgreSQL
+   ↓
+6. Return JSON Response
+   ↓
+7. Update UI with Charts/Data
 ```
 
-### Component Architecture
+### Tech Stack Overview
 
-```mermaid
-graph LR
-    subgraph "Frontend Components"
-        A[Dashboard] --> B[TaskStatsCharts]
-        A --> C[TaskList]
-        C --> D[TaskCard]
-        A --> E[Sidebar]
-    end
-    
-    subgraph "Backend Routes"
-        F[Auth Routes] --> G[/login]
-        F --> H[/signup]
-        I[Task Routes] --> J[/tasks]
-        I --> K[/tasks/:id]
-    end
-    
-    subgraph "Database Models"
-        L[User Model]
-        M[Task Model]
-        N[Label Model]
-        O[Activity Model]
-    end
-    
-    B -.->|API Call| I
-    C -.->|API Call| I
-    I --> M
-    F --> L
-    M --> L
-    
-    style A fill:#e3f2fd
-    style B fill:#fff9c4
-    style I fill:#f3e5f5
-    style M fill:#e8f5e9
-```
+**Frontend Stack:**
+- Next.js 14 (App Router)
+- TypeScript
+- TailwindCSS + Shadcn/UI
+- React Query (Data Fetching)
+- Zustand (State Management)
+- Recharts (Analytics)
+
+**Backend Stack:**
+- FastAPI (Python 3.12)
+- PostgreSQL (Neon)
+- SQLAlchemy ORM
+- Redis (Upstash)
+- JWT Authentication
+- Bcrypt Password Hashing
+
 
 ---
 
@@ -371,17 +335,26 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 
 ### Key Endpoints
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/auth/signup` | Create new account | ❌ |
-| POST | `/api/v1/auth/login` | User login | ❌ |
-| GET | `/api/v1/auth/me` | Get current user | ✅ |
-| GET | `/api/v1/tasks/` | List all tasks | ✅ |
-| POST | `/api/v1/tasks/` | Create task | ✅ |
-| GET | `/api/v1/tasks/{id}/` | Get task details | ✅ |
-| PUT | `/api/v1/tasks/{id}/` | Update task | ✅ |
-| DELETE | `/api/v1/tasks/{id}/` | Delete task | ✅ |
-| POST | `/api/v1/tasks/{id}/restore/` | Restore task | ✅ |
+#### Authentication Endpoints (Public)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/signup` | Create new user account |
+| POST | `/api/v1/auth/login` | User login with credentials |
+| POST | `/api/v1/auth/refresh` | Refresh access token |
+
+#### Protected Endpoints (Requires Authentication)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/auth/me` | Get current user profile |
+| GET | `/api/v1/tasks/` | List all user tasks |
+| POST | `/api/v1/tasks/` | Create new task |
+| GET | `/api/v1/tasks/{id}/` | Get specific task details |
+| PUT | `/api/v1/tasks/{id}/` | Update task information |
+| DELETE | `/api/v1/tasks/{id}/` | Delete task (soft delete) |
+| POST | `/api/v1/tasks/{id}/restore/` | Restore deleted task |
+| GET | `/api/v1/labels/` | List all labels |
+| POST | `/api/v1/labels/` | Create new label |
+| GET | `/api/v1/activity/` | Get activity logs |
 
 ---
 
