@@ -12,6 +12,18 @@ A full-stack task management application with analytics dashboard, built with Ne
 
 **API Health Check:** https://taskmanagerapi-production-8a33.up.railway.app/health
 
+### Database & Cache Services
+
+**PostgreSQL (Neon):**
+- **Provider:** [Neon](https://neon.tech)
+- **Purpose:** Primary database for storing users, tasks, labels, and activity logs
+- **Free Tier:** ✅ Available
+
+**Redis:**
+- **Provider:** [Upstash](https://upstash.com) or [Redis Cloud](https://redis.com/try-free/)
+- **Purpose:** Caching and session management (Optional)
+- **Free Tier:** ✅ Available
+
 ---
 
 ## ✨ Features
