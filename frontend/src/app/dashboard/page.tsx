@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { authAPI } from '@/lib/api/auth'
 import { useQuery } from '@tanstack/react-query'
 import { taskAPI } from '@/lib/api/tasks'
+import TaskStatsCharts from '@/components/TaskStatsCharts'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -109,6 +110,12 @@ export default function DashboardPage() {
               <p className="text-3xl font-bold text-green-600">{stats.completed}</p>
               <p className="text-gray-600 text-sm mt-2">Tasks completed</p>
             </div>
+          </div>
+
+          {/* Analytics Charts */}
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">📊 Analytics</h3>
+            <TaskStatsCharts tasks={tasks} />
           </div>
 
           {/* Quick Actions */}

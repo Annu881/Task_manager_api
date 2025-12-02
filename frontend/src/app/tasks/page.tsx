@@ -63,17 +63,8 @@ export default function TasksPage() {
     if (!confirm('Are you sure you want to delete this task?')) return
 
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-      const response = await fetch(`http://localhost:8000/api/v1/tasks/${id}/`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (response.ok) {
-        queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      }
+      await taskAPI.deleteTask(id)
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     } catch (error) {
       console.error('Error deleting task:', error)
     }

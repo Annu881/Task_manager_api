@@ -72,17 +72,21 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {mounted && (
-        <button onClick={toggleTheme} className="w-14 h-14 rounded-2xl hover:bg-white/50 dark:hover:bg-slate-800/50 flex items-center justify-center transition-all duration-300 mb-2">
-          {isDark ? <Sun className="w-6 h-6 text-slate-600 dark:text-slate-400" /> : <Moon className="w-6 h-6 text-slate-600 dark:text-slate-400" />}
-        </button>
-      )}
+      <button
+        onClick={toggleTheme}
+        className="w-14 h-14 rounded-2xl hover:bg-white/50 dark:hover:bg-slate-800/50 flex items-center justify-center transition-all duration-300 mb-2"
+        suppressHydrationWarning
+      >
+        {mounted && (isDark ? <Sun className="w-6 h-6 text-slate-600 dark:text-slate-400" /> : <Moon className="w-6 h-6 text-slate-600 dark:text-slate-400" />)}
+      </button>
 
-      {authAPI.isAuthenticated() && (
-        <button onClick={handleLogout} className="w-14 h-14 rounded-2xl hover:bg-red-500/10 flex items-center justify-center transition-all duration-300 group">
-          <LogOut className="w-6 h-6 text-slate-600 dark:text-slate-400 group-hover:text-red-500" />
-        </button>
-      )}
+      <button
+        onClick={handleLogout}
+        className="w-14 h-14 rounded-2xl hover:bg-red-500/10 flex items-center justify-center transition-all duration-300 group"
+        suppressHydrationWarning
+      >
+        <LogOut className="w-6 h-6 text-slate-600 dark:text-slate-400 group-hover:text-red-500" />
+      </button>
     </aside>
   )
 }
