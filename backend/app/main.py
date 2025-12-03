@@ -26,6 +26,18 @@ async def run_migrations():
     except Exception as e:
         logger.error(f"Unexpected error during migration: {str(e)}")
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    return JSONResponse(
+        status_code=500,
+        content={
+            "message": "Internal Server Error",
+            "detail": str(exc),
+            "traceback": traceback.format_exc()
+        },
+    )
+
 # CORS - Allow all origins for development
 app.add_middleware(
     CORSMiddleware,
