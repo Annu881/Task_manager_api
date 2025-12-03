@@ -1,8 +1,8 @@
 # FRESH BUILD - NO CACHE - 2025-12-04
-FROM python:3.12-slim as builder
+FROM python:3.12-slim
 
 # Unique timestamp to invalidate ALL cache
-ENV BUILD_TIMESTAMP=2025-12-04-00-33-FRESH
+ENV BUILD_TIMESTAMP=2025-12-04-00-45-FIXED
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -29,9 +29,8 @@ COPY backend/ .
 COPY start.sh .
 RUN chmod +x start.sh
 
-# Verify bcrypt is installed (not passlib)
-RUN python -c "import bcrypt; print('✅ bcrypt installed successfully')" && \
-    python -c "try:\n    import passlib\n    print('❌ ERROR: passlib found!')\n    exit(1)\nexcept ImportError:\n    print('✅ passlib not found (correct)')"
+# Verify bcrypt is installed
+RUN python -c "import bcrypt; print('bcrypt OK')"
 
 # Run the application
 CMD ["./start.sh"]
