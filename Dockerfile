@@ -1,6 +1,8 @@
 # Use Python 3.12
 FROM python:3.12-slim
 
+# Force rebuild: Fixed deployment error - 2025-12-04
+
 WORKDIR /app
 
 # Set environment variables

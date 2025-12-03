@@ -1,6 +1,8 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12-slim
 
+# Force rebuild: Fixed deployment error - 2025-12-04
+
 # Set the working directory in the container
 WORKDIR /app
 
