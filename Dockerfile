@@ -1,6 +1,9 @@
 # Use Python 3.12
 FROM python:3.12-slim
 
+# Cache buster - change this to force rebuild
+ARG CACHE_BUST=2025-12-04-00-15
+
 # Set working directory
 WORKDIR /app
 
