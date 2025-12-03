@@ -1,8 +1,30 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine, Base
+import subprocess
+import logging
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Task Management System")
+
+@app.on_event("startup")
+async def run_migrations():
+    """Run alembic migrations on startup"""
+    try:
+        logger.info("Running database migrations...")
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        logger.info(f"Migrations completed successfully: {result.stdout}")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Migration failed: {e.stderr}")
+        # Don't raise - let app start anyway, tables might already exist
+    except Exception as e:
+        logger.error(f"Unexpected error during migration: {str(e)}")
 
 # CORS - Allow all origins for development
 app.add_middleware(
