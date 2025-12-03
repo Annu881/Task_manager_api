@@ -69,3 +69,7 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+@app.get("/version")
+def version():
+    return {"version": "1.1.0", "deployed_at": "2025-12-04_00:15_FIXED_BCRYPT"}
