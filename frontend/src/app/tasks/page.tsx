@@ -89,8 +89,35 @@ export default function TasksPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen bg-gray-100">
+        <header className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 className="text-2xl font-bold text-gray-900">Task Management</h1>
+          </div>
+        </header>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-800">My Tasks</h2>
+            <div className="bg-gray-200 h-12 w-32 rounded-lg animate-pulse" />
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
+                <div className="flex items-start gap-4">
+                  <div className="w-6 h-6 bg-gray-200 rounded-full" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-6 bg-gray-200 rounded w-3/4" />
+                    <div className="h-4 bg-gray-200 rounded w-full" />
+                    <div className="flex gap-2">
+                      <div className="h-6 bg-gray-200 rounded w-20" />
+                      <div className="h-6 bg-gray-200 rounded w-20" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     )
   }
