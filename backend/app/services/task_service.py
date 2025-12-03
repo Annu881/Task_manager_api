@@ -90,8 +90,9 @@ class TaskService:
             task.labels = labels
             self.db.commit()
 
-        if changes:
-            self._create_activity_log(task.id, owner_id, "updated", ", ".join(changes))
+        # Always log updates, even if no changes detected
+        log_message = ", ".join(changes) if changes else f"Task '{task.title}' updated"
+        self._create_activity_log(task.id, owner_id, "updated", log_message)
 
         self._invalidate_cache(owner_id)
         self.db.refresh(task)
