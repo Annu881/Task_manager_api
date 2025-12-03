@@ -23,6 +23,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY backend/ .
 
+# Copy startup script
+COPY start.sh .
+RUN chmod +x start.sh
+
 # Run the application
-# We use shell form to allow variable expansion for $PORT
-CMD sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+CMD ["./start.sh"]
