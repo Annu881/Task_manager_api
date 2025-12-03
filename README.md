@@ -10,7 +10,7 @@
 
 A modern, full-stack task management application with real-time analytics, built with Next.js and FastAPI.
 
-[🚀 Live Demo](https://task-manager-api-eta-sepia.vercel.app) • [📖 API Docs](https://taskmanagerapi-production-8a33.up.railway.app/docs) • [🐛 Report Bug](https://github.com/Annu881/Task_manager_api/issues)
+[🚀 Live Demo](https://task-manager-api-7bkr.vercel.app) • [📖 API Docs](https://taskmanagerapi-production-8a33.up.railway.app/docs) • [🐛 Report Bug](https://github.com/Annu881/Task_manager_api/issues)
 
 </div>
 
@@ -161,7 +161,7 @@ Task Management System is a production-ready application that helps teams and in
 
 | Service | Platform | URL | Status |
 |---------|----------|-----|--------|
-| **Frontend** | Vercel | [task-manager-api-eta-sepia.vercel.app](https://task-manager-api-eta-sepia.vercel.app) | ![Status](https://img.shields.io/badge/status-live-success) |
+| **Frontend** | Vercel | [task-manager-api-7bkr.vercel.app](https://task-manager-api-7bkr.vercel.app) | ![Status](https://img.shields.io/badge/status-live-success) |
 | **Backend API** | Railway | [taskmanagerapi-production-8a33.up.railway.app](https://taskmanagerapi-production-8a33.up.railway.app) | ![Status](https://img.shields.io/badge/status-live-success) |
 | **API Docs** | Railway | [/docs](https://taskmanagerapi-production-8a33.up.railway.app/docs) | ![Status](https://img.shields.io/badge/status-live-success) |
 | **Health Check** | Railway | [/health](https://taskmanagerapi-production-8a33.up.railway.app/health) | ![Status](https://img.shields.io/badge/status-healthy-success) |
