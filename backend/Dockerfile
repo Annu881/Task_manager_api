@@ -26,5 +26,6 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8000
 
+# Force rebuild - Updated: 2025-12-03
 # Command to run the application
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
