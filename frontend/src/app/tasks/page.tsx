@@ -29,9 +29,11 @@ export default function TasksPage() {
       return result
     },
     enabled: mounted,
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    retry: 0, // Don't retry on first load
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   })
 
   useEffect(() => {

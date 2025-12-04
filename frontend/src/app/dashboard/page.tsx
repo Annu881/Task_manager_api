@@ -20,9 +20,11 @@ export default function DashboardPage() {
     queryKey: ['tasks'],
     queryFn: () => taskAPI.getTasks({}),
     enabled: mounted,
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 0, // Don't retry on first load
+    staleTime: 10 * 60 * 1000, // 10 minutes - data stays fresh longer
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    refetchOnMount: false, // Use cached data on mount if available
   })
 
   useEffect(() => {
