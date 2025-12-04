@@ -27,6 +27,8 @@ def get_tasks(
     overdue: bool = Query(False, description="Show only overdue tasks"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+    sort_by: str = Query("created_at", description="Sort by field (created_at, due_date, priority)"),
+    sort_order: str = Query("desc", description="Sort order (asc, desc)"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -37,7 +39,8 @@ def get_tasks(
     
     tasks, total = service.get_tasks(
         owner_id=current_user.id, search=search, status=status, priority=priority,
-        label_ids=label_id_list, overdue_only=overdue, page=page, page_size=page_size
+        label_ids=label_id_list, overdue_only=overdue, page=page, page_size=page_size,
+        sort_by=sort_by, sort_order=sort_order
     )
     
     total_pages = math.ceil(total / page_size)

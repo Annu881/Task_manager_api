@@ -1,9 +1,10 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
+import { Plus, Trash2, Edit } from 'lucide-react'
 import { useState } from 'react'
 import { apiClient } from '@/lib/api/client'
 import { useTaskStore } from '@/lib/store/taskStore'
+import toast from 'react-hot-toast'
 
 interface Label {
     id: number
@@ -14,8 +15,10 @@ interface Label {
 
 export default function LabelsPage() {
     const { openTaskModal } = useTaskStore()
-    const [showCreateModal, setShowCreateModal] = useState(false)
-    const [newLabel, setNewLabel] = useState({ name: '', color: '#6366f1' })
+
+    const [showModal, setShowModal] = useState(false)
+    const [editingLabel, setEditingLabel] = useState<Label | null>(null)
+    const [formData, setFormData] = useState({ name: '', color: '#6366f1' })
 
     const { data: labels, isLoading, refetch } = useQuery({
         queryKey: ['labels'],
@@ -25,14 +28,47 @@ export default function LabelsPage() {
         },
     })
 
-    const handleCreateLabel = async () => {
+    const handleSubmit = async () => {
         try {
-            await apiClient.post('/labels/', newLabel)
-            setShowCreateModal(false)
-            setNewLabel({ name: '', color: '#6366f1' })
+            if (editingLabel) {
+                await apiClient.put(`/labels/${editingLabel.id}`, formData)
+                toast.success('Label updated successfully')
+            } else {
+                await apiClient.post('/labels/', formData)
+                toast.success('Label created successfully')
+            }
+            setShowModal(false)
+            setFormData({ name: '', color: '#6366f1' })
+            setEditingLabel(null)
             refetch()
         } catch (error) {
-            console.error('Error creating label:', error)
+            console.error('Error saving label:', error)
+            toast.error(editingLabel ? 'Failed to update label' : 'Failed to create label')
+        }
+    }
+
+    const openCreateModal = () => {
+        setEditingLabel(null)
+        setFormData({ name: '', color: '#6366f1' })
+        setShowModal(true)
+    }
+
+    const openEditModal = (label: Label) => {
+        setEditingLabel(label)
+        setFormData({ name: label.name, color: label.color })
+        setShowModal(true)
+    }
+
+    const handleDeleteLabel = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this label?')) return
+
+        try {
+            await apiClient.delete(`/labels/${id}`)
+            refetch()
+            toast.success('Label deleted successfully')
+        } catch (error) {
+            console.error('Error deleting label:', error)
+            toast.error('Failed to delete label')
         }
     }
 
@@ -44,7 +80,7 @@ export default function LabelsPage() {
                         Labels
                     </h1>
                     <button
-                        onClick={() => setShowCreateModal(true)}
+                        onClick={openCreateModal}
                         className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium hover:shadow-lg transition-all flex items-center gap-2"
                     >
                         <Plus className="w-5 h-5" />
@@ -63,8 +99,30 @@ export default function LabelsPage() {
                         {labels?.map((label) => (
                             <div
                                 key={label.id}
-                                className="glass-card p-6 rounded-2xl hover:shadow-lg transition-all"
+                                className="glass-card p-6 rounded-2xl hover:shadow-lg transition-all group relative"
                             >
+                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            openEditModal(label)
+                                        }}
+                                        className="p-2 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                        title="Edit label"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDeleteLabel(label.id)
+                                        }}
+                                        className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        title="Delete label"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                                 <div className="flex items-center gap-3">
                                     <div
                                         className="w-8 h-8 rounded-full"
@@ -84,18 +142,20 @@ export default function LabelsPage() {
                     </div>
                 )}
 
-                {/* Create Label Modal */}
-                {showCreateModal && (
+                {/* Create/Edit Label Modal */}
+                {showModal && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <div className="glass-card p-8 rounded-3xl max-w-md w-full mx-4">
-                            <h2 className="text-2xl font-bold mb-6">Create New Label</h2>
+                            <h2 className="text-2xl font-bold mb-6">
+                                {editingLabel ? 'Edit Label' : 'Create New Label'}
+                            </h2>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-2">Name</label>
                                     <input
                                         type="text"
-                                        value={newLabel.name}
-                                        onChange={(e) => setNewLabel({ ...newLabel, name: e.target.value })}
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-3 rounded-xl border bg-white dark:bg-slate-800"
                                         placeholder="Enter label name"
                                     />
@@ -104,21 +164,21 @@ export default function LabelsPage() {
                                     <label className="block text-sm font-medium mb-2">Color</label>
                                     <input
                                         type="color"
-                                        value={newLabel.color}
-                                        onChange={(e) => setNewLabel({ ...newLabel, color: e.target.value })}
+                                        value={formData.color}
+                                        onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                                         className="w-full h-12 rounded-xl border"
                                     />
                                 </div>
                             </div>
                             <div className="flex gap-3 mt-6">
                                 <button
-                                    onClick={handleCreateLabel}
+                                    onClick={handleSubmit}
                                     className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white"
                                 >
-                                    Create
+                                    {editingLabel ? 'Update' : 'Create'}
                                 </button>
                                 <button
-                                    onClick={() => setShowCreateModal(false)}
+                                    onClick={() => setShowModal(false)}
                                     className="flex-1 px-6 py-3 rounded-xl bg-gray-100 dark:bg-slate-800"
                                 >
                                     Cancel

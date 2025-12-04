@@ -52,13 +52,14 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 # Import routes AFTER creating tables
-from app.api.routes import tasks, auth, labels, activity, notifications
+from app.api.routes import tasks, auth, labels, activity, notifications, comments
 
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(labels.router, prefix="/api/v1")
 app.include_router(activity.router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
+app.include_router(comments.router, prefix="/api/v1")
 
 
 @app.get("/")

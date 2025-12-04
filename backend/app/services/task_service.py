@@ -51,20 +51,29 @@ class TaskService:
 
     def get_tasks(self, owner_id: int, search: Optional[str] = None, status: Optional[TaskStatus] = None,
                   priority: Optional[TaskPriority] = None, label_ids: Optional[List[int]] = None,
-                  overdue_only: bool = False, page: int = 1, page_size: int = 20) -> tuple[List[Task], int]:
-        cache_key = f"tasks:user:{owner_id}:page:{page}:size:{page_size}"
+                  overdue_only: bool = False, page: int = 1, page_size: int = 20,
+                  sort_by: str = "created_at", sort_order: str = "desc") -> tuple[List[Task], int]:
+        cache_key = f"tasks:user:{owner_id}:page:{page}:size:{page_size}:sort:{sort_by}:{sort_order}"
         if not any([search, status, priority, label_ids, overdue_only]):
             cached = redis_client.get(cache_key)
             if cached:
                 data = json.loads(cached)
                 # Fetch full task objects from IDs
                 task_ids = data['tasks']
-                tasks = self.db.query(Task).filter(Task.id.in_(task_ids)).all() if task_ids else []
-                return tasks, data['total']
+                # Maintain sort order from cache
+                if not task_ids:
+                    return [], data['total']
+                
+                tasks = self.db.query(Task).filter(Task.id.in_(task_ids)).all()
+                # Re-sort in memory because SQL IN clause doesn't guarantee order
+                task_map = {t.id: t for t in tasks}
+                sorted_tasks = [task_map[tid] for tid in task_ids if tid in task_map]
+                return sorted_tasks, data['total']
 
         skip = (page - 1) * page_size
         tasks, total = self.repo.search_tasks(owner_id=owner_id, search=search, status=status, priority=priority,
-                                              label_ids=label_ids, overdue_only=overdue_only, skip=skip, limit=page_size)
+                                              label_ids=label_ids, overdue_only=overdue_only, skip=skip, limit=page_size,
+                                              sort_by=sort_by, sort_order=sort_order)
 
         if not any([search, status, priority, label_ids, overdue_only]):
             # Store only IDs in cache to avoid serialization issues

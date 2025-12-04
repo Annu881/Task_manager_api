@@ -3,9 +3,12 @@ import { useState, useEffect } from 'react'
 import { useTaskStore } from '@/lib/store/taskStore'
 import { taskAPI } from '@/lib/api/tasks'
 import { TaskPriority, TaskStatus } from '@/types'
-import { X, Calendar, Flag, Activity } from 'lucide-react'
-import { format } from 'date-fns'
+import { X, Calendar, Flag, Activity, MessageCircle, Trash2, Send } from 'lucide-react'
+import { format, formatDistanceToNow } from 'date-fns'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
+import { commentAPI, Comment } from '@/lib/api/comments'
+import { useQuery } from '@tanstack/react-query'
 
 export default function TaskModal() {
   const { selectedTask, isTaskModalOpen, closeTaskModal, updateTask, addTask } = useTaskStore()
@@ -17,6 +20,14 @@ export default function TaskModal() {
     priority: TaskPriority.MEDIUM,
     status: TaskStatus.TODO,
     due_date: '',
+  })
+  const [newComment, setNewComment] = useState('')
+
+  // Fetch comments for the selected task
+  const { data: comments = [], refetch: refetchComments } = useQuery({
+    queryKey: ['comments', selectedTask?.id],
+    queryFn: () => commentAPI.getTaskComments(selectedTask!.id),
+    enabled: !!selectedTask?.id,
   })
 
   useEffect(() => {
@@ -41,7 +52,12 @@ export default function TaskModal() {
     onSuccess: (data) => {
       addTask(data)
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      toast.success('✅ Task created successfully!')
       closeTaskModal()
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.detail || 'Failed to create task'
+      toast.error(`❌ ${errorMessage}`)
     },
   })
 
@@ -51,21 +67,54 @@ export default function TaskModal() {
     onSuccess: (data) => {
       updateTask(data.id, data)
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      toast.success('✅ Task updated successfully!')
       setIsEditing(false)
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.detail || 'Failed to update task'
+      toast.error(`❌ ${errorMessage}`)
     },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // datetime-local gives us "YYYY-MM-DDTHH:MM", we need to add ":00" for seconds
-    let due_date = formData.due_date ? `${formData.due_date}:00` : undefined
+    // Convert datetime-local to ISO 8601 format with timezone
+    let due_date = formData.due_date ? new Date(formData.due_date).toISOString() : undefined
 
     const taskData = { ...formData, due_date }
     if (selectedTask) {
       updateMutation.mutate({ id: selectedTask.id, data: taskData })
     } else {
       createMutation.mutate(taskData)
+    }
+  }
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !selectedTask) return
+
+    try {
+      await commentAPI.createComment({
+        content: newComment.trim(),
+        task_id: selectedTask.id
+      })
+      setNewComment('')
+      refetchComments()
+      toast.success('💬 Comment added!')
+    } catch (error) {
+      toast.error('Failed to add comment')
+    }
+  }
+
+  const handleDeleteComment = async (commentId: number) => {
+    if (!confirm('Delete this comment?')) return
+
+    try {
+      await commentAPI.deleteComment(commentId)
+      refetchComments()
+      toast.success('Comment deleted')
+    } catch (error) {
+      toast.error('Failed to delete comment')
     }
   }
 
@@ -180,6 +229,66 @@ export default function TaskModal() {
               </div>
             </div>
 
+            {/* COMMENTS SECTION */}
+            {selectedTask && (
+              <div className="mt-6">
+                <h3 className="flex items-center gap-2 mb-3 text-lg font-semibold">
+                  <MessageCircle className="w-5 h-5 text-blue-500" /> Comments
+                </h3>
+
+                {/* Add Comment Form */}
+                <div className="flex gap-2 mb-4">
+                  <input
+                    type="text"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newComment.trim()) {
+                        handleAddComment()
+                      }
+                    }}
+                    placeholder="Add a comment..."
+                    className="flex-1 px-4 py-2 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                  />
+                  <button
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  >
+                    <Send size={18} />
+                  </button>
+                </div>
+
+                {/* Comments List */}
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {comments.length === 0 ? (
+                    <p className="text-center text-slate-500 py-4">No comments yet. Be the first to comment!</p>
+                  ) : (
+                    comments.map((comment: Comment) => (
+                      <div
+                        key={comment.id}
+                        className="flex gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 group relative"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm">{comment.content}</p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {formatDistanceToNow(new Date(comment.created_at + 'Z'), { addSuffix: true })}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="opacity-0 group-hover:opacity-100 p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                          title="Delete comment"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
 
             {/* ACTIVITY LOG */}
             {selectedTask && selectedTask.activity_logs?.length > 0 && (
@@ -197,7 +306,7 @@ export default function TaskModal() {
                       <div className="flex-1">
                         <p>{log.description}</p>
                         <p className="text-xs opacity-60">
-                          {format(new Date(log.created_at), 'MMM d, h:mm a')}
+                          {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
                         </p>
                       </div>
                     </div>

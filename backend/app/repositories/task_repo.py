@@ -20,7 +20,8 @@ class TaskRepository(BaseRepository[Task]):
 
     def search_tasks(self, owner_id: int, search: Optional[str] = None, status: Optional[TaskStatus] = None,
                      priority: Optional[TaskPriority] = None, label_ids: Optional[List[int]] = None,
-                     overdue_only: bool = False, skip: int = 0, limit: int = 100) -> tuple[List[Task], int]:
+                     overdue_only: bool = False, skip: int = 0, limit: int = 100,
+                     sort_by: str = "created_at", sort_order: str = "desc") -> tuple[List[Task], int]:
         query = self.db.query(Task).filter(and_(Task.owner_id == owner_id, Task.is_deleted == False))
 
         if search:
@@ -37,6 +38,30 @@ class TaskRepository(BaseRepository[Task]):
 
         if overdue_only:
             query = query.filter(and_(Task.due_date < datetime.utcnow(), Task.status != TaskStatus.COMPLETED))
+
+        # Sorting logic
+        if sort_by == "priority":
+            from sqlalchemy import case
+            priority_order = case(
+                (Task.priority == TaskPriority.HIGH, 3),
+                (Task.priority == TaskPriority.MEDIUM, 2),
+                (Task.priority == TaskPriority.LOW, 1),
+                else_=0
+            )
+            if sort_order == "asc":
+                query = query.order_by(priority_order.asc())
+            else:
+                query = query.order_by(priority_order.desc())
+        elif sort_by == "due_date":
+            if sort_order == "asc":
+                query = query.order_by(Task.due_date.asc().nulls_last())
+            else:
+                query = query.order_by(Task.due_date.desc().nulls_last())
+        else:  # Default to created_at
+            if sort_order == "asc":
+                query = query.order_by(Task.created_at.asc())
+            else:
+                query = query.order_by(Task.created_at.desc())
 
         total = query.count()
         tasks = query.offset(skip).limit(limit).all()

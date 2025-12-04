@@ -7,7 +7,8 @@ import { Plus, CheckCircle, Circle, Trash2, Edit, Clock } from 'lucide-react'
 import { useTaskStore } from '@/lib/store/taskStore'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { taskAPI } from '@/lib/api/tasks'
-import { Task } from '@/types'
+import { Task, TaskStatus, TaskPriority } from '@/types'
+import { Search, Filter, ArrowUpDown } from 'lucide-react'
 
 export default function TasksPage() {
   const router = useRouter()
@@ -16,24 +17,47 @@ export default function TasksPage() {
   const { openTaskModal } = useTaskStore()
   const queryClient = useQueryClient()
 
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState<TaskStatus | undefined>(undefined)
+  const [priority, setPriority] = useState<TaskPriority | undefined>(undefined)
+  const [sortBy, setSortBy] = useState('created_at')
+  const [sortOrder, setSortOrder] = useState('desc')
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput)
+    }, 800) // Wait 800ms after user stops typing for smoother experience
+
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const { data: tasksData, isLoading: loading, error } = useQuery({
-    queryKey: ['tasks'],
+  const { data: tasksData, isLoading: loading, error, isFetching } = useQuery({
+    queryKey: ['tasks', search, status, priority, sortBy, sortOrder],
     queryFn: async () => {
-      console.log('Fetching tasks...')
-      const result = await taskAPI.getTasks({})
+      console.log('Fetching tasks with params:', { search, status, priority, sortBy, sortOrder })
+      const result = await taskAPI.getTasks({
+        search: search || undefined,
+        status,
+        priority,
+        sort_by: sortBy,
+        sort_order: sortOrder
+      })
       console.log('Tasks fetched:', result)
       return result
     },
     enabled: mounted,
-    retry: 0, // Don't retry on first load
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 0,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching
   })
 
   useEffect(() => {
@@ -79,9 +103,15 @@ export default function TasksPage() {
     },
   })
 
-  const toggleTaskStatus = (task: Task) => {
-    const newStatus = task.status === 'completed' ? 'pending' : 'completed'
-    toggleMutation.mutate({ id: task.id, data: { ...task, status: newStatus } })
+  const toggleTaskStatus = (task: Task, isDoubleClick: boolean = false) => {
+    // If task is not completed, mark it as completed (single click)
+    if (task.status !== 'completed') {
+      toggleMutation.mutate({ id: task.id, data: { ...task, status: 'completed' } })
+    }
+    // If task is completed, only uncomplete it on double-click
+    else if (isDoubleClick) {
+      toggleMutation.mutate({ id: task.id, data: { ...task, status: 'todo' } })
+    }
   }
 
   const handleLogout = () => {
@@ -167,6 +197,99 @@ export default function TasksPage() {
           </button>
         </div>
 
+        {/* Filters and Search */}
+        <div className="bg-white p-4 rounded-lg shadow mb-6 flex flex-wrap gap-4 items-center">
+          <div className="flex-1 min-w-[200px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            {isFetching && searchInput && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+              </div>
+            )}
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div className="flex gap-4 flex-wrap">
+            <select
+              value={status || ''}
+              onChange={(e) => setStatus(e.target.value ? e.target.value as TaskStatus : undefined)}
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+            >
+              <option value="">All Status</option>
+              <option value="todo">To Do</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+
+            <select
+              value={priority || ''}
+              onChange={(e) => setPriority(e.target.value ? e.target.value as TaskPriority : undefined)}
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+            >
+              <option value="">All Priority</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+
+            <div className="flex items-center gap-2 border rounded-lg px-2 bg-gray-50">
+              <span className="text-sm text-gray-500 pl-2">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-2 py-2 bg-transparent focus:outline-none text-gray-700 font-medium"
+              >
+                <option value="created_at">Created Date</option>
+                <option value="due_date">Due Date</option>
+                <option value="priority">Priority</option>
+              </select>
+              <button
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                className="p-2 hover:bg-gray-200 rounded-md transition-colors"
+                title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+              >
+                <ArrowUpDown size={18} className={sortOrder === 'asc' ? 'rotate-180' : ''} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Search Results Header */}
+        {(search || status || priority) && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Search className="w-5 h-5 text-blue-600" />
+              <div>
+                <p className="font-medium text-blue-900 dark:text-blue-100">
+                  {search && `Search results for "${search}"`}
+                  {status && !search && `Filtered by status: ${status}`}
+                  {priority && !search && !status && `Filtered by priority: ${priority}`}
+                </p>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Found {tasks.length} task{tasks.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setSearchInput('')
+                setSearch('')
+                setStatus(undefined)
+                setPriority(undefined)
+              }}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
+
         {/* Tasks List */}
         <div className="space-y-4">
           {tasks.length === 0 ? (
@@ -177,13 +300,15 @@ export default function TasksPage() {
             tasks.map((task) => (
               <div
                 key={task.id}
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow group"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4 flex-1">
                     <button
-                      onClick={() => toggleTaskStatus(task)}
+                      onClick={() => toggleTaskStatus(task, false)}
+                      onDoubleClick={() => toggleTaskStatus(task, true)}
                       className="mt-1"
+                      title={task.status === 'completed' ? 'Double-click to mark as incomplete' : 'Click to mark as complete'}
                     >
                       {task.status === 'completed' ? (
                         <CheckCircle className="text-green-500" size={24} />
@@ -234,12 +359,22 @@ export default function TasksPage() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="text-red-500 hover:text-red-700 ml-4"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => openTaskModal(task)}
+                      className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Edit task"
+                    >
+                      <Edit size={20} />
+                    </button>
+                    <button
+                      onClick={() => deleteTask(task.id)}
+                      className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete task"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
