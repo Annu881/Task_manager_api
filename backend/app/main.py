@@ -75,7 +75,7 @@ def health():
 
 @app.get("/version")
 def version():
-    return {"version": "1.2.0", "deployed_at": "2025-12-05_01:42_FIXED_REDIS"}
+    return {"version": "1.3.0", "deployed_at": "2025-12-05_02:01_FIXED_TASK_UPDATE"}
 
 @app.get("/favicon.ico")
 async def favicon():
