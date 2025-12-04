@@ -116,8 +116,12 @@ class TaskService:
         
         for field, new_value in update_data.items():
             old_value = getattr(task, field)
-            if old_value != new_value:
-                changes.append(f"{field}: {old_value} → {new_value}")
+            # Convert both to strings for comparison to handle enums and datetimes
+            try:
+                if str(old_value) != str(new_value):
+                    changes.append(f"{field}: {old_value} → {new_value}")
+            except Exception as e:
+                logger.error(f"Error comparing field {field}: {e}")
         
         self.repo.update(task, update_data)
 
@@ -128,7 +132,10 @@ class TaskService:
 
         # Always log updates, even if no changes detected
         log_message = ", ".join(changes) if changes else f"Task '{task.title}' updated"
-        self._create_activity_log(task.id, owner_id, "updated", log_message)
+        try:
+            self._create_activity_log(task.id, owner_id, "updated", log_message)
+        except Exception as e:
+            logger.error(f"Failed to create activity log: {e}")
 
         self._invalidate_cache(owner_id)
         self.db.refresh(task)
