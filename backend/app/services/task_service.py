@@ -27,9 +27,12 @@ class TaskService:
         self.db.commit()
 
     def _invalidate_cache(self, owner_id: int):
-        pattern = f"tasks:user:{owner_id}:*"
-        for key in redis_client.scan_iter(match=pattern):
-            redis_client.delete(key)
+        try:
+            pattern = f"tasks:user:{owner_id}:*"
+            for key in redis_client.scan_iter(match=pattern):
+                redis_client.delete(key)
+        except Exception as e:
+            print(f"Redis error during cache invalidation: {e}")
 
     def create_task(self, task_in: TaskCreate, owner_id: int) -> Task:
         task_data = task_in.model_dump(exclude={'label_ids'})
@@ -58,20 +61,23 @@ class TaskService:
                   sort_by: str = "created_at", sort_order: str = "desc") -> tuple[List[Task], int]:
         cache_key = f"tasks:user:{owner_id}:page:{page}:size:{page_size}:sort:{sort_by}:{sort_order}"
         if not any([search, status, priority, label_ids, overdue_only]):
-            cached = redis_client.get(cache_key)
-            if cached:
-                data = json.loads(cached)
-                # Fetch full task objects from IDs
-                task_ids = data['tasks']
-                # Maintain sort order from cache
-                if not task_ids:
-                    return [], data['total']
-                
-                tasks = self.db.query(Task).filter(Task.id.in_(task_ids)).all()
-                # Re-sort in memory because SQL IN clause doesn't guarantee order
-                task_map = {t.id: t for t in tasks}
-                sorted_tasks = [task_map[tid] for tid in task_ids if tid in task_map]
-                return sorted_tasks, data['total']
+            try:
+                cached = redis_client.get(cache_key)
+                if cached:
+                    data = json.loads(cached)
+                    # Fetch full task objects from IDs
+                    task_ids = data['tasks']
+                    # Maintain sort order from cache
+                    if not task_ids:
+                        return [], data['total']
+                    
+                    tasks = self.db.query(Task).filter(Task.id.in_(task_ids)).all()
+                    # Re-sort in memory because SQL IN clause doesn't guarantee order
+                    task_map = {t.id: t for t in tasks}
+                    sorted_tasks = [task_map[tid] for tid in task_ids if tid in task_map]
+                    return sorted_tasks, data['total']
+            except Exception as e:
+                print(f"Redis error during cache retrieval: {e}")
 
         skip = (page - 1) * page_size
         tasks, total = self.repo.search_tasks(owner_id=owner_id, search=search, status=status, priority=priority,
@@ -80,8 +86,11 @@ class TaskService:
 
         if not any([search, status, priority, label_ids, overdue_only]):
             # Store only IDs in cache to avoid serialization issues
-            cache_data = {'tasks': [t.id for t in tasks], 'total': total}
-            redis_client.setex(cache_key, settings.CACHE_TTL, json.dumps(cache_data))
+            try:
+                cache_data = {'tasks': [t.id for t in tasks], 'total': total}
+                redis_client.setex(cache_key, settings.CACHE_TTL, json.dumps(cache_data))
+            except Exception as e:
+                print(f"Redis error during cache set: {e}")
 
         return tasks, total
 
