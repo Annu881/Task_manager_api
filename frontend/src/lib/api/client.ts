@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1').replace('http://', 'https://')
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1').replace(/^http:\/\//i, 'https://')
 
 console.log('API URL:', API_BASE_URL)
 
