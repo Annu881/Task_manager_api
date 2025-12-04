@@ -38,7 +38,7 @@ export default function TaskModal() {
         priority: selectedTask.priority,
         status: selectedTask.status,
         due_date: selectedTask.due_date
-          ? format(new Date(selectedTask.due_date), 'yyyy-MM-dd')
+          ? format(new Date(selectedTask.due_date), "yyyy-MM-dd'T'HH:mm")
           : '',
       })
       setIsEditing(false)
