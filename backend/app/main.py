@@ -39,10 +39,18 @@ async def global_exception_handler(request, exc):
         },
     )
 
-# CORS - Allow all origins for development
+# CORS - Allow specific origins for production
+origins = [
+    "http://localhost:3000",
+    "https://task-manager-api-green-zeta.vercel.app",
+    "https://task-manager-api-lgvr.vercel.app",
+    "https://task-manager-api.vercel.app",
+    "*"  # Keep * for now as fallback, but specific domains are better
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
