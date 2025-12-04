@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     DEBUG: bool = True
     DATABASE_URL: str = "postgresql://taskuser:taskpass@localhost:5432/taskdb"
+    REDIS_URL: str | None = None
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
