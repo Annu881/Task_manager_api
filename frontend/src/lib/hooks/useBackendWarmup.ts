@@ -7,7 +7,9 @@ export function useBackendWarmup(apiUrl: string) {
     useEffect(() => {
         const warmupBackend = async () => {
             try {
-                const healthUrl = apiUrl.replace('/api/v1', '/health')
+                // Enforce HTTPS to prevent mixed content errors
+                const secureApiUrl = apiUrl.replace(/^http:\/\//i, 'https://')
+                const healthUrl = secureApiUrl.replace('/api/v1', '/health')
                 const response = await fetch(healthUrl, {
                     method: 'GET',
                     signal: AbortSignal.timeout(30000), // 30 second timeout
