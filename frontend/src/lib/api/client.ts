@@ -1,13 +1,8 @@
 import axios from 'axios'
 
-let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1'
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1').replace('http://', 'https://')
 
-// Force HTTPS in production to prevent Mixed Content errors
-if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && apiUrl.startsWith('http://')) {
-  apiUrl = apiUrl.replace('http://', 'https://')
-}
-
-const API_BASE_URL = apiUrl
+console.log('API URL:', API_BASE_URL)
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
