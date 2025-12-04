@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { authAPI } from '@/lib/api/auth'
 import { Plus, CheckCircle, Circle, Trash2, Edit, Clock } from 'lucide-react'
@@ -103,14 +103,39 @@ export default function TasksPage() {
     },
   })
 
-  const toggleTaskStatus = (task: Task, isDoubleClick: boolean = false) => {
-    // If task is not completed, mark it as completed (single click)
-    if (task.status !== 'completed') {
-      toggleMutation.mutate({ id: task.id, data: { ...task, status: 'completed' } })
-    }
-    // If task is completed, only uncomplete it on double-click
-    else if (isDoubleClick) {
-      toggleMutation.mutate({ id: task.id, data: { ...task, status: 'todo' } })
+  // Click delay mechanism to distinguish single vs double click
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const clickCountRef = useRef(0)
+
+  const handleTaskToggle = (task: Task) => {
+    clickCountRef.current += 1
+
+    if (clickCountRef.current === 1) {
+      // First click - start timer
+      clickTimerRef.current = setTimeout(() => {
+        // Single click confirmed - mark as complete
+        if (task.status !== 'completed') {
+          toggleMutation.mutate({
+            id: task.id,
+            data: { ...task, status: 'completed' }
+          })
+        }
+        clickCountRef.current = 0
+      }, 300)
+    } else if (clickCountRef.current === 2) {
+      // Second click within timeout - it's a double click
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current)
+      }
+
+      // Double click - toggle back to incomplete
+      if (task.status === 'completed') {
+        toggleMutation.mutate({
+          id: task.id,
+          data: { ...task, status: 'todo' }
+        })
+      }
+      clickCountRef.current = 0
     }
   }
 
@@ -305,8 +330,7 @@ export default function TasksPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4 flex-1">
                     <button
-                      onClick={() => toggleTaskStatus(task, false)}
-                      onDoubleClick={() => toggleTaskStatus(task, true)}
+                      onClick={() => handleTaskToggle(task)}
                       className="mt-1"
                       title={task.status === 'completed' ? 'Double-click to mark as incomplete' : 'Click to mark as complete'}
                     >
