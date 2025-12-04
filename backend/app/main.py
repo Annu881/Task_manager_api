@@ -73,3 +73,9 @@ def health():
 @app.get("/version")
 def version():
     return {"version": "1.1.0", "deployed_at": "2025-12-04_00:15_FIXED_BCRYPT"}
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Return 204 No Content for favicon requests to prevent 404 errors"""
+    from fastapi.responses import Response
+    return Response(status_code=204)
