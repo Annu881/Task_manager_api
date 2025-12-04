@@ -56,7 +56,11 @@ export default function TaskModal() {
       closeTaskModal()
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.detail || 'Failed to create task'
+      console.error('Create Task Error:', error)
+      const errorMessage =
+        error?.response?.data?.detail ||
+        error?.message ||
+        'Failed to create task'
       toast.error(`❌ ${errorMessage}`)
     },
   })
@@ -71,7 +75,11 @@ export default function TaskModal() {
       setIsEditing(false)
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.detail || 'Failed to update task'
+      console.error('Update Task Error:', error)
+      const errorMessage =
+        error?.response?.data?.detail ||
+        error?.message ||
+        'Failed to update task'
       toast.error(`❌ ${errorMessage}`)
     },
   })
