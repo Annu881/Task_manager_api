@@ -1,11 +1,16 @@
 import axios from 'axios'
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1').replace(/^http:\/\//i, 'https://')
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1'
 
-console.log('API URL:', API_BASE_URL)
+// Only force HTTPS for production Railway URLs, not localhost
+const finalApiUrl = API_BASE_URL.includes('localhost')
+  ? API_BASE_URL
+  : API_BASE_URL.replace(/^http:\/\//i, 'https://')
+
+console.log('API URL:', finalApiUrl)
 
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: finalApiUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,7 +40,7 @@ apiClient.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem('refresh_token')
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+        const response = await axios.post(`${finalApiUrl}/auth/refresh`, {
           refresh_token: refreshToken,
         })
 

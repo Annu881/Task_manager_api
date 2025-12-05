@@ -98,32 +98,47 @@ export default function TaskModal() {
     }
   }
 
-  const handleAddComment = async () => {
-    if (!newComment.trim() || !selectedTask) return
-
-    try {
-      await commentAPI.createComment({
-        content: newComment.trim(),
-        task_id: selectedTask.id
-      })
+  const addCommentMutation = useMutation({
+    mutationFn: (data: { content: string; task_id: number }) =>
+      commentAPI.createComment(data),
+    onSuccess: () => {
       setNewComment('')
       refetchComments()
       toast.success('💬 Comment added!')
-    } catch (error) {
-      toast.error('Failed to add comment')
-    }
-  }
+    },
+    onError: (error: any) => {
+      console.error('Add Comment Error:', error)
+      const errorMessage =
+        error?.response?.data?.detail ||
+        error?.message ||
+        'Failed to add comment'
+      toast.error(`❌ ${errorMessage}`)
+    },
+  })
 
-  const handleDeleteComment = async (commentId: number) => {
-    if (!confirm('Delete this comment?')) return
-
-    try {
-      await commentAPI.deleteComment(commentId)
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: number) => commentAPI.deleteComment(commentId),
+    onSuccess: () => {
       refetchComments()
       toast.success('Comment deleted')
-    } catch (error) {
+    },
+    onError: (error: any) => {
+      console.error('Delete Comment Error:', error)
       toast.error('Failed to delete comment')
-    }
+    },
+  })
+
+  const handleAddComment = () => {
+    if (!newComment.trim() || !selectedTask) return
+    addCommentMutation.mutate({
+      content: newComment.trim(),
+      task_id: selectedTask.id
+    })
+  }
+
+  const handleDeleteComment = (commentId: number) => {
+    if (!confirm('Delete this comment?')) return
+    deleteCommentMutation.mutate(commentId)
   }
 
   if (!isTaskModalOpen) return null
@@ -260,10 +275,14 @@ export default function TaskModal() {
                   />
                   <button
                     onClick={handleAddComment}
-                    disabled={!newComment.trim()}
+                    disabled={!newComment.trim() || addCommentMutation.isPending}
                     className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                   >
-                    <Send size={18} />
+                    {addCommentMutation.isPending ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Send size={18} />
+                    )}
                   </button>
                 </div>
 
@@ -314,7 +333,7 @@ export default function TaskModal() {
                       <div className="flex-1">
                         <p>{log.description}</p>
                         <p className="text-xs opacity-60">
-                          {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(log.created_at + 'Z'), { addSuffix: true })}
                         </p>
                       </div>
                     </div>

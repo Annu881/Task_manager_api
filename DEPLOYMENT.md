@@ -192,6 +192,106 @@ In Vercel project settings:
 
 ---
 
+## 🔄 Automatic Deployment & Updates
+
+### How Automatic Deployment Works
+
+**When you push code to GitHub, both Vercel and Railway automatically detect the changes and redeploy your application.** This means you don't need to manually trigger deployments every time you make updates to your code. Here's exactly what happens:
+
+#### The Automatic Process:
+
+1. **You Push Code to GitHub**
+   ```bash
+   git add .
+   git commit -m "your changes"
+   git push origin main
+   ```
+
+2. **Vercel Detects Changes** (Frontend)
+   - Vercel monitors your GitHub repository
+   - When new commits are pushed to `main` branch, Vercel automatically:
+     - Pulls the latest code
+     - Installs dependencies (`npm install`)
+     - Builds the Next.js application (`npm run build`)
+     - Deploys to production
+     - Updates your live URL instantly
+   - **Time:** Usually 2-3 minutes
+   - **No manual action required!**
+
+3. **Railway Detects Changes** (Backend)
+   - Railway also monitors your GitHub repository
+   - When new commits are pushed, Railway automatically:
+     - Pulls the latest code
+     - Installs Python dependencies
+     - Runs database migrations (if configured)
+     - Restarts the FastAPI server
+     - Updates your API endpoints
+   - **Time:** Usually 3-5 minutes
+   - **No manual action required!**
+
+#### Page Refresh Behavior:
+
+**Question:** "Kya page refresh Vercel ke link se chal jayega?" (Will the page refresh work from Vercel's link?)
+
+**Answer:** **Yes, absolutely!** Once Vercel completes the automatic deployment:
+
+- ✅ **Your live Vercel URL will automatically serve the new code**
+- ✅ **Simply refresh the page** in your browser (F5 or Ctrl+R)
+- ✅ **All changes will be visible immediately** - no need to clear cache or do anything special
+- ✅ **Users visiting the site will automatically get the latest version**
+
+**Important Notes:**
+- Sometimes browsers cache static files. If you don't see changes immediately, do a **hard refresh**:
+  - **Windows/Linux:** `Ctrl + Shift + R` or `Ctrl + F5`
+  - **Mac:** `Cmd + Shift + R`
+- Vercel uses CDN caching, but it automatically invalidates cache on new deployments
+- The deployment is **atomic** - users either see the old version or the new version, never a broken state
+
+#### Monitoring Deployments:
+
+**Vercel Dashboard:**
+1. Go to https://vercel.com/dashboard
+2. Click on your project
+3. Go to **Deployments** tab
+4. You'll see:
+   - ✅ **Building** - Deployment in progress
+   - ✅ **Ready** - Deployment successful and live
+   - ❌ **Error** - Build failed (check logs)
+
+**Railway Dashboard:**
+1. Go to https://railway.app/dashboard
+2. Click on your project
+3. Go to **Deployments** tab
+4. Monitor build logs in real-time
+
+#### Environment Variables:
+
+> [!IMPORTANT]
+> **Critical:** If you change environment variables in Vercel or Railway dashboards, you MUST manually trigger a redeploy for changes to take effect.
+
+**To redeploy after env var changes:**
+- **Vercel:** Deployments → Latest deployment → "Redeploy"
+- **Railway:** Deployments → "Deploy" button
+
+#### Troubleshooting Auto-Deploy:
+
+If automatic deployment doesn't work:
+
+1. **Check GitHub Integration:**
+   - Vercel: Settings → Git → Ensure repository is connected
+   - Railway: Settings → GitHub → Verify integration
+
+2. **Check Branch Settings:**
+   - Ensure you're pushing to the correct branch (`main` or `master`)
+   - Vercel/Railway must be configured to watch that branch
+
+3. **Manual Trigger:**
+   - If auto-deploy fails, you can always manually trigger:
+     - Vercel: Click "Redeploy" button
+     - Railway: Click "Deploy" button
+
+---
+
 ## 5️⃣ Final Configuration
 
 ### Update Backend CORS
