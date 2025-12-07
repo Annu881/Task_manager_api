@@ -20,7 +20,7 @@ export const commentAPI = {
     },
 
     createComment: async (data: CommentCreate): Promise<Comment> => {
-        const response = await apiClient.post('/comments/', data)
+        const response = await apiClient.post('/comments', data)
         return response.data
     },
 
