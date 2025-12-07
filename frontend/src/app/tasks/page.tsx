@@ -114,12 +114,10 @@ export default function TasksPage() {
       // First click - start timer
       clickTimerRef.current = setTimeout(() => {
         // Single click confirmed - mark as complete
-        if (task.status !== 'completed') {
-          toggleMutation.mutate({
-            id: task.id,
-            data: { ...task, status: 'completed' }
-          })
-        }
+        toggleMutation.mutate({
+          id: task.id,
+          data: { ...task, status: 'completed' }
+        })
         clickCountRef.current = 0
       }, 300)
     } else if (clickCountRef.current === 2) {
@@ -128,13 +126,11 @@ export default function TasksPage() {
         clearTimeout(clickTimerRef.current)
       }
 
-      // Double click - toggle back to incomplete
-      if (task.status === 'completed') {
-        toggleMutation.mutate({
-          id: task.id,
-          data: { ...task, status: 'todo' }
-        })
-      }
+      // Double click - mark as incomplete
+      toggleMutation.mutate({
+        id: task.id,
+        data: { ...task, status: 'todo' }
+      })
       clickCountRef.current = 0
     }
   }
