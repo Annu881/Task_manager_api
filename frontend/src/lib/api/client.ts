@@ -28,6 +28,31 @@ export const apiClient = axios.create({
   withCredentials: false, // Important for CORS
 })
 
+// Runtime HTTPS enforcement interceptor (failsafe)
+apiClient.interceptors.request.use(
+  (config) => {
+    // Force HTTPS for all non-localhost requests
+    if (config.url && !config.url.includes('localhost') && !config.url.includes('127.0.0.1')) {
+      if (config.url.startsWith('http://')) {
+        console.warn('⚠️ Forcing HTTPS for:', config.url)
+        config.url = config.url.replace(/^http:\/\//i, 'https://')
+      }
+    }
+
+    // Also check baseURL
+    if (config.baseURL && !config.baseURL.includes('localhost') && !config.baseURL.includes('127.0.0.1')) {
+      if (config.baseURL.startsWith('http://')) {
+        console.warn('⚠️ Forcing HTTPS for baseURL:', config.baseURL)
+        config.baseURL = config.baseURL.replace(/^http:\/\//i, 'https://')
+      }
+    }
+
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
+
 apiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
