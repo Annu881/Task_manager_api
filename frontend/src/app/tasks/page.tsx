@@ -103,38 +103,13 @@ export default function TasksPage() {
     },
   })
 
-  // Click delay mechanism to distinguish single vs double click
-  const clickTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const clickCountRef = useRef(0)
-
   const handleTaskToggle = (task: Task) => {
-    clickCountRef.current += 1
-
-    if (clickCountRef.current === 1) {
-      // First click - start timer to mark as complete
-      clickTimerRef.current = setTimeout(() => {
-        // Single click - mark as completed (if not already)
-        if (task.status !== 'completed') {
-          toggleMutation.mutate({
-            id: task.id,
-            data: { ...task, status: 'completed' }
-          })
-        }
-        clickCountRef.current = 0
-      }, 300)
-    } else if (clickCountRef.current === 2) {
-      // Second click within timeout - it's a double click
-      if (clickTimerRef.current) {
-        clearTimeout(clickTimerRef.current)
-      }
-
-      // Double click - mark as incomplete (todo)
-      toggleMutation.mutate({
-        id: task.id,
-        data: { ...task, status: 'todo' }
-      })
-      clickCountRef.current = 0
-    }
+    // Simple instant toggle - much more responsive!
+    const newStatus = task.status === 'completed' ? 'todo' : 'completed'
+    toggleMutation.mutate({
+      id: task.id,
+      data: { ...task, status: newStatus }
+    })
   }
 
   const handleLogout = () => {
@@ -330,7 +305,7 @@ export default function TasksPage() {
                     <button
                       onClick={() => handleTaskToggle(task)}
                       className="mt-1"
-                      title={task.status === 'completed' ? 'Double-click to mark as incomplete' : 'Click to mark as complete'}
+                      title={task.status === 'completed' ? 'Click to mark as incomplete' : 'Click to mark as complete'}
                     >
                       {task.status === 'completed' ? (
                         <CheckCircle className="text-green-500" size={24} />
