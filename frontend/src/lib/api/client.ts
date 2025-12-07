@@ -2,12 +2,23 @@ import axios from 'axios'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1'
 
-// Only force HTTPS for production Railway URLs, not localhost
-const finalApiUrl = API_BASE_URL.includes('localhost')
-  ? API_BASE_URL
-  : API_BASE_URL.replace(/^http:\/\//i, 'https://')
+// Force HTTPS in production (when not localhost)
+const finalApiUrl = (() => {
+  // If it's localhost, keep as-is
+  if (API_BASE_URL.includes('localhost') || API_BASE_URL.includes('127.0.0.1')) {
+    return API_BASE_URL
+  }
 
-console.log('API URL:', finalApiUrl)
+  // For all other URLs, force HTTPS
+  return API_BASE_URL.replace(/^http:\/\//i, 'https://')
+})()
+
+// Log for debugging
+if (typeof window !== 'undefined') {
+  console.log('🌐 API URL:', finalApiUrl)
+  console.log('🔒 Using HTTPS:', finalApiUrl.startsWith('https://'))
+}
+
 
 export const apiClient = axios.create({
   baseURL: finalApiUrl,
