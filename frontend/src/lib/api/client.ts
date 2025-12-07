@@ -1,6 +1,23 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1'
+// Get the API URL from environment variable or use default
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://taskmanagerapi-production-8a33.up.railway.app/api/v1'
+
+// CRITICAL: Always force HTTPS for production Railway URLs
+const API_BASE_URL = (() => {
+  // If it's localhost, keep as-is
+  if (rawApiUrl.includes('localhost') || rawApiUrl.includes('127.0.0.1')) {
+    return rawApiUrl
+  }
+
+  // For Railway URLs, ALWAYS force HTTPS
+  if (rawApiUrl.includes('railway.app')) {
+    return rawApiUrl.replace(/^http:\/\//i, 'https://')
+  }
+
+  // For any other production URL, force HTTPS
+  return rawApiUrl.replace(/^http:\/\//i, 'https://')
+})()
 
 // Force HTTPS in production (when not localhost)
 const finalApiUrl = (() => {
@@ -13,11 +30,22 @@ const finalApiUrl = (() => {
   return API_BASE_URL.replace(/^http:\/\//i, 'https://')
 })()
 
-// Log for debugging
+// Enhanced logging for debugging
 if (typeof window !== 'undefined') {
-  console.log('🌐 API URL:', finalApiUrl)
+  console.log('🔍 Environment Variable (raw):', process.env.NEXT_PUBLIC_API_URL)
+  console.log('🔍 Raw API URL:', rawApiUrl)
+  console.log('🌐 Final API URL:', finalApiUrl)
   console.log('🔒 Using HTTPS:', finalApiUrl.startsWith('https://'))
+
+  // Alert if HTTP is detected
+  if (finalApiUrl.startsWith('http://')) {
+    console.error('❌ WARNING: Still using HTTP! This will cause Mixed Content errors!')
+    console.error('❌ Please update NEXT_PUBLIC_API_URL in Vercel to use https://')
+  } else {
+    console.log('✅ HTTPS correctly configured')
+  }
 }
+
 
 
 export const apiClient = axios.create({
