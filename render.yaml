@@ -1,7 +1,9 @@
 services:
+  # Backend API Service
   - type: web
     name: task-manager-api
     env: python
+    rootDirectory: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -21,3 +23,14 @@ services:
         value: 7
       - key: CACHE_TTL
         value: 300
+
+  # Frontend Web Service
+  - type: web
+    name: task-manager-frontend
+    env: node
+    rootDirectory: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false

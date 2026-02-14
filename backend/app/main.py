@@ -44,7 +44,7 @@ async def global_exception_handler(request, exc):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Local development
-    allow_origin_regex=r"https://.*\.vercel\.app",  # Allow ANY Vercel app
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com",  # Allow Vercel and Render apps
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
