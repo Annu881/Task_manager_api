@@ -10,7 +10,7 @@
 
 A modern, full-stack task management application with real-time analytics, built with Next.js and FastAPI.
 
-[🚀 Live Demo](https://task-manager-api-five-zeta.vercel.app) • [📖 API Docs](https://taskmanagerapi-production-8a33.up.railway.app/docs) • [🐛 Report Bug](https://github.com/Annu881/Task_manager_api/issues)
+[🚀 Live Demo](https://task-manager-frontend-a2q1.onrender.com) • [📖 API Docs](https://task-manager-api-zsjf.onrender.com/docs) • [🐛 Report Bug](https://github.com/Annu881/Task_manager_api/issues)
 
 </div>
 
@@ -57,7 +57,7 @@ Task Management System is a production-ready application that helps teams and in
                              │ HTTPS
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    FRONTEND - Vercel                             │
+│                    FRONTEND - Render                             │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
 │  │   Next.js    │  │ React Query  │  │   Zustand    │          │
 │  │   App Router │  │    Cache     │  │    State     │          │
@@ -66,7 +66,7 @@ Task Management System is a production-ready application that helps teams and in
                              │ REST API
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    BACKEND - Railway                             │
+│                    BACKEND - Render                              │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
 │  │   FastAPI    │  │     JWT      │  │  SQLAlchemy  │          │
 │  │    Server    │  │     Auth     │  │     ORM      │          │
@@ -87,9 +87,9 @@ Task Management System is a production-ready application that helps teams and in
 ```
 1. User Action (Browser)
    ↓
-2. Next.js Frontend (Vercel)
+2. Next.js Frontend (Render)
    ↓
-3. API Request → FastAPI Backend (Railway)
+3. API Request → FastAPI Backend (Render)
    ↓
 4. JWT Validation
    ↓
@@ -161,10 +161,10 @@ Task Management System is a production-ready application that helps teams and in
 
 | Service | Platform | URL | Status |
 |---------|----------|-----|--------|
-| **Frontend** | Vercel | [task-manager-api-five-zeta.vercel.app](https://task-manager-api-five-zeta.vercel.app) | ![Status](https://img.shields.io/badge/status-live-success) |
-| **Backend API** | Railway | [taskmanagerapi-production-8a33.up.railway.app](https://taskmanagerapi-production-8a33.up.railway.app) | ![Status](https://img.shields.io/badge/status-live-success) |
-| **API Docs** | Railway | [/docs](https://taskmanagerapi-production-8a33.up.railway.app/docs) | ![Status](https://img.shields.io/badge/status-live-success) |
-| **Health Check** | Railway | [/health](https://taskmanagerapi-production-8a33.up.railway.app/health) | ![Status](https://img.shields.io/badge/status-healthy-success) |
+| **Frontend** | Render | [task-manager-frontend-a2q1.onrender.com](https://task-manager-frontend-a2q1.onrender.com) | ![Status](https://img.shields.io/badge/status-live-success) |
+| **Backend API** | Render | [task-manager-api-zsjf.onrender.com](https://task-manager-api-zsjf.onrender.com) | ![Status](https://img.shields.io/badge/status-live-success) |
+| **API Docs** | Render | [/docs](https://task-manager-api-zsjf.onrender.com/docs) | ![Status](https://img.shields.io/badge/status-live-success) |
+| **Health Check** | Render | [/health](https://task-manager-api-zsjf.onrender.com/health) | ![Status](https://img.shields.io/badge/status-healthy-success) |
 
 ### Database & Cache Services
 
@@ -330,8 +330,8 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 
 ### Interactive Docs
 
-- **Swagger UI:** [https://taskmanagerapi-production-8a33.up.railway.app/docs](https://taskmanagerapi-production-8a33.up.railway.app/docs)
-- **ReDoc:** [https://taskmanagerapi-production-8a33.up.railway.app/redoc](https://taskmanagerapi-production-8a33.up.railway.app/redoc)
+- **Swagger UI:** [https://task-manager-api-zsjf.onrender.com/docs](https://task-manager-api-zsjf.onrender.com/docs)
+- **ReDoc:** [https://task-manager-api-zsjf.onrender.com/redoc](https://task-manager-api-zsjf.onrender.com/redoc)
 
 ### Key Endpoints
 
@@ -408,8 +408,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Recharts](https://recharts.org/) - Composable charting library
 - [Shadcn/UI](https://ui.shadcn.com/) - Beautiful UI components
 - [Neon](https://neon.tech) - Serverless PostgreSQL
-- [Railway](https://railway.app) - Infrastructure platform
-- [Vercel](https://vercel.com) - Frontend deployment platform
+- [Railway](https://railway.app) - Infrastructure platform (Previous)
+- [Render](https://render.com) - Cloud hosting platform (Current)
+- [Vercel](https://vercel.com) - Frontend deployment platform (Previous)
 
 ---
 
