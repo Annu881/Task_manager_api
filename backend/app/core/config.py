@@ -21,7 +21,20 @@ class Settings(BaseSettings):
     @field_validator("DATABASE_URL")
     @classmethod
     def assemble_db_connection(cls, v: str | None) -> str:
-        if v and v.startswith("postgres://"):
+        if not v:
+            return v
+        
+        # Strip potential psql command prefix and quotes
+        # Example: psql 'postgresql://...' -> postgresql://...
+        v = v.strip()
+        if v.startswith("psql "):
+            v = v[5:].strip()
+        
+        # Remove single or double quotes at start/end
+        if (v.startswith("'") and v.endswith("'")) or (v.startswith('"') and v.endswith('"')):
+            v = v[1:-1].strip()
+
+        if v.startswith("postgres://"):
             return v.replace("postgres://", "postgresql://", 1)
         return v
 
