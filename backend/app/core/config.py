@@ -38,6 +38,31 @@ class Settings(BaseSettings):
             return v.replace("postgres://", "postgresql://", 1)
         return v
 
+    @field_validator("REDIS_URL")
+    @classmethod
+    def assemble_redis_connection(cls, v: str | None) -> str | None:
+        if not v:
+            return v
+        
+        # Strip potential redis-cli command prefixes
+        # Example: redis-cli --tls -u redis://... -> redis://...
+        v = v.strip()
+        if v.startswith("redis-cli"):
+            # Find the -u or --url flag which precedes the actual URL
+            import re
+            match = re.search(r"-u\s+([^\s]+)", v)
+            if match:
+                v = match.group(1).strip()
+            else:
+                # If no -u flag, it might be at the end
+                v = v.split()[-1].strip()
+
+        # Remove single or double quotes at start/end
+        if (v.startswith("'") and v.endswith("'")) or (v.startswith('"') and v.endswith('"')):
+            v = v[1:-1].strip()
+            
+        return v
+
     class Config:
         env_file = ".env"
 
