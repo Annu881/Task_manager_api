@@ -43,7 +43,10 @@ async def global_exception_handler(request, exc):
 # Using regex to allow all Vercel deployments (production, preview, git branches)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for troubleshooting
+    allow_origins=[
+        "http://localhost:3000",
+        "https://task-manager-frontend-a2q1.onrender.com"  # Your frontend domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
