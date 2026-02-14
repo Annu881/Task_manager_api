@@ -5,8 +5,8 @@ Complete step-by-step guide to deploy your full-stack application for **FREE**!
 ## 📋 Overview
 
 We'll deploy:
-- **Backend (FastAPI)** → Render.com
-- **Frontend (Next.js)** → Vercel
+- **Backend (FastAPI)** → Render.com (via `render.yaml`)
+- **Frontend (Next.js)** → Render.com (via `render.yaml`)
 - **Database (PostgreSQL)** → Neon.tech
 - **Cache (Redis)** → Upstash
 
